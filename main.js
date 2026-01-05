@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import cors from 'cors'
 import questionRoute from './routes/questionRoute.js'
 import dotenv from 'dotenv'
+// import { authenticate } from "./middleware/auth.js"
 
 dotenv.config()
 const app = express()

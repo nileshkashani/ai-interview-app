@@ -76,5 +76,18 @@ router.get('/:interviewId/:qNo', async (req, resp) => {
         resp.json({success: false, message: e})
     }
 })
+router.get('/:interviewId', async (req, resp) => {
+    try {
+        const response = await questionModel.find({interviewId: req.params.interviewId})
+        // console.log(resp);
+        resp.json({success: true, data: response})
+    } catch (e) {
+        console.log(e);
+        resp.json({success: false, message: e})
+    }
+})
+
+
+
 
 export default router 
