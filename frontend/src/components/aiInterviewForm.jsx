@@ -10,11 +10,11 @@ const AiInterviewForm = () => {
     const [experience, setExperience] = useState("")
     const [skills, setSkills] = useState("")
     const handleSubmit = async () => {
-        const resp = await axios.post('http://localhost:3000/interview/add', {userId: localStorage.getItem("userUid"), topic: interviewTopic, experience: experience, skills: skills});
+        const resp = await axios.post('http://localhost:3000/interview/add', { userId: localStorage.getItem("userUid"), topic: interviewTopic, experience: experience, skills: skills });
         console.log(resp);
     }
     return (
-        <div className="min-h-screen bg-white flex items-center justify-center px-6 py-10">
+        <div className="bg-white  max-h-screen px-6 py-10 pt-2 overflow-hidden">
             <Card className="w-full max-w-5xl min-h-screen border-zinc-300">
                 <CardHeader className="pb-8">
                     <CardTitle className="text-2xl text-red-500 font-bold">

@@ -15,7 +15,7 @@ import { logoutUser } from "@/services/authService"
 import InterviewCards from "./interviewCards"
 
 const navItems = [
-  { label: "Overview", icon: LayoutGrid},
+  { label: "Overview", icon: LayoutGrid },
   { label: "Mock Interview", icon: AiOutlineRobot },
   { label: "Interview Quiz", icon: HelpCircle },
   { label: "Create Room", icon: Video },
@@ -29,7 +29,7 @@ const AfterLoginLayout = () => {
     await logoutUser();
   }
   return (
-    <div className="flex w-screen">
+      <div className="flex min-h-screen w-screen overflow-hidden">
       <aside className="h-screen w-64 bg-zinc-900 text-zinc-100 flex flex-col">
         <div className="flex items-center gap-2 px-6 py-5 text-lg font-semibold">
           <div className="h-8 w-8 rounded-lg bg-red-500 flex items-center justify-center">
@@ -44,8 +44,8 @@ const AfterLoginLayout = () => {
               key={item.label}
               variant="ghost"
               className={`w-full justify-start gap-3 px-4 py-6 text-sm ${activeTab === item.label
-                  ? "bg-red-500 text-white hover:bg-red-500"
-                  : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-red-500 text-white hover:bg-red-500"
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
                 }`}
               onClick={() => setActiveTab(item.label)}
             >
@@ -67,14 +67,21 @@ const AfterLoginLayout = () => {
           </Button>
         </div>
       </aside>
-      <div>
-        {activeTab === "Mock Interview" && 
-          <div className="flex w-screen">
-            <AiInterviewForm/> 
-            <InterviewCards/>
+      <main className="flex-1 overflow-y-auto">
+        {activeTab === "Mock Interview" && (
+          <div className="flex flex-col lg:flex-row w-full h-full">
+
+            <div className="flex-1">
+              <AiInterviewForm />
+            </div>
+
+            <div className=" lg:w-[420px]">
+              <InterviewCards />
+            </div>
+
           </div>
-        }
-      </div>
+        )}
+      </main>
     </div>
   )
 }
