@@ -30,15 +30,15 @@ export default function AiInterview() {
     let parsedQuestions;
 
     const parsedQuestionsRef = useRef([])
-    useEffect(() => {
-        if (questions.length) {
-            parsedQuestionsRef.current = questions.map(q => (q.text))
-        }
-        if (parsedQuestionsRef.current.length) {
-            parsedQuestions = parsedQuestionsRef.current;
-            startInterview()
-        }
-    }, [questions])
+    // useEffect(() => {
+    //     if (questions.length) {
+    //         parsedQuestionsRef.current = questions.map(q => (q.text))
+    //     }
+    //     if (parsedQuestionsRef.current.length) {
+    //         parsedQuestions = parsedQuestionsRef.current;
+    //         startInterview()
+    //     }
+    // }, [questions])  //uncomment to start interview
 
     useEffect(() => {
         const func = async () => {

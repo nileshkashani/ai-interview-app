@@ -5,6 +5,8 @@ import { Input } from "./ui/input"
 import { Label } from "@radix-ui/react-label"
 import { useAuth } from "@/contexts/authContext"
 import { Zap, Mail, Lock, ArrowRight } from "lucide-react"
+import { FcGoogle } from 'react-icons/fc'
+import { loginWithGoogle } from "@/services/authService"
 
 export default function Login() {
   const [email, setEmail] = useState("")
@@ -13,13 +15,15 @@ export default function Login() {
 
   const { login } = useAuth()
   const navigate = useNavigate()
-    
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
     try {
-      await login(email, password)
-      navigate("/ai-interview")
+      const resp = await login(email, password)
+      localStorage.setItem("userUid", resp.uid)
+      localStorage.setItem("name", resp.displayName)
+      navigate("/dashboard")
     } catch (error) {
       console.error("Login failed:", error)
     } finally {
@@ -27,6 +31,18 @@ export default function Login() {
     }
   }
 
+  const handleSigninWithGoogle = async () => {
+    try {
+      const resp = await loginWithGoogle()
+      localStorage.setItem("userUid", resp.uid)
+      localStorage.setItem("name", resp.displayName)
+      navigate("/dashboard")
+    } catch (error) {
+      console.error("Login failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
 
@@ -85,6 +101,16 @@ export default function Login() {
               {isLoading ? "Signing in..." : "Sign in"}
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
+
+            <Button
+              type="button"
+              onClick={handleSigninWithGoogle}
+              variant="outline"
+              className="w-full"
+            >
+              <FcGoogle /> Sign in with Google
+            </Button>
+
 
           </form>
 

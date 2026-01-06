@@ -7,11 +7,10 @@ dotenv.config()
 const router = e.Router()
 
 
-const getPrompt = (post) => `
+const getPrompt = (post, experience, skills) => `
 You are an AI interview engine.
 
-Your task is to generate exactly 9 high-quality technical interview questions for the role of ${post}.
-
+Your task is to generate exactly 9 high-quality technical interview questions for the role of ${post}, having ${experience}, and having ${skills}
 You MUST follow these rules strictly:
 
 1. The output MUST be a valid JSON array of 9 objects.
@@ -32,13 +31,12 @@ Required JSON format:
 ]
 `
 
-
-router.post('/generate', async (req, resp) => {
+export const generateQuestions = async (topic, experience, skills, interviewId) => {
     try {
         const ai = new GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY
         })
-        const prompt = getPrompt(req.body.postOfInterview);
+        const prompt = getPrompt(topic, experience, skills);
         const geminiResponse = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
@@ -48,23 +46,23 @@ router.post('/generate', async (req, resp) => {
 
         for (const r of parsedResponse) {
             questionModel.create({
-                interviewId: req.body.interviewId,
+                interviewId: interviewId,
                 text: r.text,
                 qNo: r.qNo,
-                postOfInterview: req.body.postOfInterview 
+                postOfInterview: topic
             })
         }
         
-        resp.json({ 
+        return { 
             success: "true",
-            message: 'added to db successfully' 
-        })
+            message: "added to database successfully"
+        }
     }
     catch (e) {
         console.log(e);
-        resp.json({ message: e })
+        return { message: e }
     }
-})
+}
 
 router.get('/:interviewId/:qNo', async (req, resp) => {
     try {
@@ -86,8 +84,5 @@ router.get('/:interviewId', async (req, resp) => {
         resp.json({success: false, message: e})
     }
 })
-
-
-
 
 export default router 

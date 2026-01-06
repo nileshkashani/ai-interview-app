@@ -4,6 +4,7 @@ import cors from 'cors'
 import questionRoute from './routes/questionRoute.js'
 import dotenv from 'dotenv'
 // import { authenticate } from "./middleware/auth.js"
+import interviewRoute from './routes/interviewRoutes.js'
 
 dotenv.config()
 const app = express()
@@ -16,6 +17,7 @@ app.use(cors({
   credentials: true
 }))
 app.use('/questions', questionRoute)
+app.use('/interview', interviewRoute);
 
 app.get('/', (req, resp) => {
     resp.json("hello world");

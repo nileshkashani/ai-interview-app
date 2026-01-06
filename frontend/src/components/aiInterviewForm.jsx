@@ -1,0 +1,71 @@
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { useState } from "react"
+import axios from "axios"
+
+const AiInterviewForm = () => {
+    const [interviewTopic, setInterviewTopic] = useState("")
+    const [experience, setExperience] = useState("")
+    const [skills, setSkills] = useState("")
+    const handleSubmit = async () => {
+        const resp = await axios.post('http://localhost:3000/interview/add', {userId: localStorage.getItem("userUid"), topic: interviewTopic, experience: experience, skills: skills});
+        console.log(resp);
+    }
+    return (
+        <div className="min-h-screen bg-white flex items-center justify-center px-6 py-10">
+            <Card className="w-full max-w-5xl min-h-screen border-zinc-300">
+                <CardHeader className="pb-8">
+                    <CardTitle className="text-2xl text-red-500 font-bold">
+                        AI Interview Setup
+                    </CardTitle>
+                </CardHeader>
+
+                <CardContent className="space-y-10">
+                    <div className="flex flex-col gap-10">
+                        <div className="space-y-3 w-full">
+                            <Label className="text-black text-base overflow-clip">
+                                Interview Topic / Position
+                            </Label>
+                            <Input
+                                onChange={(e) => setInterviewTopic(e.target.value)}
+                                placeholder="Frontend Developer, Data Scientist, etc."
+                                className="h-14 text-base border-zinc-300"
+                            />
+                        </div>
+
+                        <div className="space-y-3 w-full">
+                            <Label className="text-black text-base">
+                                Experience Level (in years)
+                            </Label>
+                            <Input
+                                onChange={(e) => setExperience(e.target.value)}
+                                type="number"
+                                placeholder="1 - 10"
+                                className="h-14 text-base border-zinc-300"
+                            />
+                        </div>
+                        <div className="space-y-3">
+                            <Label className="text-black text-base">
+                                Primary Skills / Technologies
+                            </Label>
+                            <Input
+                                onChange={(e) => setSkills(e.target.value)}
+                                placeholder="React, Node.js, SQL, etc."
+                                className="h-14 text-base border-zinc-300"
+                            />
+                        </div>
+                    </div>
+
+
+                    <Button onClick={handleSubmit} className="w-full h-14 text-base bg-red-500 hover:bg-red-600">
+                        Start AI Interview
+                    </Button>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
+export default AiInterviewForm

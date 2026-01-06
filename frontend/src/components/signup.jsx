@@ -6,6 +6,8 @@ import { Label } from "@radix-ui/react-label"
 import { useAuth } from "@/contexts/authContext"
 import { Zap, Mail, Lock, User, ArrowRight, Users, Briefcase } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { FcGoogle } from "react-icons/fc"
+import { loginWithGoogle } from "@/services/authService"
 
 export default function Signup() {
   const [name, setName] = useState("")
@@ -22,14 +24,31 @@ export default function Signup() {
     setIsLoading(true)
 
     try {
-      await signup(name, email, password, role)
-      navigate("/ai-interview")
+      const resp = await signup(name, email, password, role)
+      localStorage.setItem("userUid", resp.uid)
+      localStorage.setItem("name", resp.displayName)
+      navigate("/dashboard")
     } catch (error) {
       console.error("Signup failed:", error)
     } finally {
       setIsLoading(false)
     }
   }
+
+  const handleSignupWithGoogle = async () => {
+    try {
+      const resp = await loginWithGoogle();
+      localStorage.setItem("userUid", resp.uid)
+      localStorage.setItem("name", resp.displayName)
+      navigate('/dashboard')
+    } catch (error) {
+      console.error("Signup failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
+
+  }
+
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
@@ -52,46 +71,6 @@ export default function Signup() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Role Selection */}
-            <div className="space-y-2">
-              <Label>I am a</Label>
-              <div className="grid grid-cols-2 gap-3">
-
-                <button
-                  type="button"
-                  onClick={() => setRole("candidate")}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition",
-                    role === "candidate"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                >
-                  <Briefcase className={cn("h-6 w-6", role === "candidate" ? "text-primary" : "text-muted-foreground")} />
-                  <span className={cn("text-sm font-medium", role === "candidate" ? "text-primary" : "text-muted-foreground")}>
-                    Candidate
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setRole("interviewer")}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition",
-                    role === "interviewer"
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  )}
-                >
-                  <Users className={cn("h-6 w-6", role === "interviewer" ? "text-primary" : "text-muted-foreground")} />
-                  <span className={cn("text-sm font-medium", role === "interviewer" ? "text-primary" : "text-muted-foreground")}>
-                    Interviewer
-                  </span>
-                </button>
-
-              </div>
-            </div>
 
             {/* Name */}
             <div className="space-y-2">
@@ -147,6 +126,9 @@ export default function Signup() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creating account..." : "Create account"}
               <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button onClick={handleSignupWithGoogle} variant="outline" className="w-full">
+              <FcGoogle /> Sign up with Google
             </Button>
 
           </form>
