@@ -12,6 +12,7 @@ router.post('/add', async (req, resp) => {
             skills: req.body.skills,
             isCompleted: false
         })
+        console.log(response._id);
         const questionResp = await generateQuestions(req.body.topic, req.body.experience, req.body.skills, response._id);
         resp.json({success: true, data: response, message: "questions saved to database"});
     }
@@ -24,7 +25,7 @@ router.post('/add', async (req, resp) => {
 router.get('/getAll/:userId', async (req, resp) => {
     try{
         const response = await InterviewModel.find({userId: req.params.userId});
-        console.log(response);
+        // console.log(response);
         resp.json({success: true, data: response});
     }
     catch(e){
@@ -32,4 +33,34 @@ router.get('/getAll/:userId', async (req, resp) => {
         resp.json({success :false, message: e});
     }
 })
+
+router.put('/update/:interviewId', async (req, resp) => {
+  try {
+    const result = await InterviewModel.updateOne(
+      { _id: req.params.interviewId },
+      { $set: { isCompleted: true } }
+    )
+
+    if (result.matchedCount === 0) {
+      return resp.status(404).json({ success: false, message: "Interview not found" })
+    }
+
+    resp.json({ success: true, data: result })
+
+  } catch (e) {
+    resp.status(500).json({ success: false, message: e.message })
+  }
+})
+
+
+router.get('/getById/:interviewId', async (req, resp) => {
+    try{
+        resp.json({success: true, data: await InterviewModel.findById(req.params.interviewId)});
+    }
+    catch(e){
+        resp.json({success: false, message: e});
+    }
+})
+
 export default router;
+

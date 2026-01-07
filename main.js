@@ -2,9 +2,11 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import questionRoute from './routes/questionRoute.js'
+import answerRoute from './routes/answerRoutes.js'
 import dotenv from 'dotenv'
 // import { authenticate } from "./middleware/auth.js"
 import interviewRoute from './routes/interviewRoutes.js'
+import resultRoute from './routes/resultRoutes.js'
 
 dotenv.config()
 const app = express()
@@ -18,6 +20,8 @@ app.use(cors({
 }))
 app.use('/questions', questionRoute)
 app.use('/interview', interviewRoute);
+app.use('/answers', answerRoute);
+app.use('/results', resultRoute);
 
 app.get('/', (req, resp) => {
     resp.json("hello world");

@@ -1,13 +1,22 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { TabStore } from '@/store/tabStore';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom'
+
 
 const InterviewCards = () => {
+
+  const { state } = useLocation()
   const [data, setData] = useState([]);
+  const navigate = useNavigate()
+  const trigger = TabStore(s => s.trigger);
   useEffect(() => {
     const func = async () => {
       try {
         const resp = await axios.get(`http://localhost:3000/interview/getAll/${localStorage.getItem("userUid")}`)
+        console.log("interviews:", resp);
         setData(resp.data.data)
       }
       catch (e) {
@@ -15,9 +24,9 @@ const InterviewCards = () => {
       }
     }
     func();
-  }, [])
+  }, [trigger])
   return (
-    <div className="bg-white max-h-screen px-6 py-10 pt-2">
+    <div className="bg-white max-h-screen px-6 py-10 pt-2 overflow-auto">
 
       <Card className="pt-2 h-full py-7">
         <CardHeader className="pb-4">
@@ -27,29 +36,33 @@ const InterviewCards = () => {
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="space-y-4">
-          {data.map(item => (
-            <div
-              key={item._id}
-              className="flex items-center justify-between border rounded-xl p-4 hover:shadow-sm transition"
-            >
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-red-50 text-red-500 font-semibold text-lg">
-                  {item.topic?.[0]?.toUpperCase()}
-                </div>
+        <CardContent className="space-y-4 cursor-pointer" >
+          {data
+            .filter(item => !item.isCompleted)
+            .map(item => (
+              <div
+                key={item._id}
+                onClick={() => navigate('/ai-interview', { state: { interviewId: item._id } })}
+                className="flex items-center justify-between border rounded-xl p-4 hover:shadow-sm transition"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-red-50 text-red-500 font-semibold text-lg">
+                    {item.topic?.[0]?.toUpperCase()}
+                  </div>
 
-                <div>
-                  <p className="font-medium capitalize">{item.topic}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Experience: {item.experience} year{item.experience > 1 ? "s" : ""}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Skills: {item.skills.join(", ")}
-                  </p>
+                  <div>
+                    <p className="font-medium capitalize">{item.topic}</p>
+                    <p className="text-sm text-muted-foreground">
+                      Experience: {item.experience} year{item.experience > 1 ? "s" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Skills: {item.skills.join(", ")}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+
         </CardContent>
       </Card>
     </div>

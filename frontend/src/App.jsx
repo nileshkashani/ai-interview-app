@@ -7,6 +7,7 @@ import Signup from './components/signup'
 import AiInterview from './components/aiInterview'
 import AfterLoginLayout from './components/afterLoginLayout'
 import ProtectedRoute from './components/ProjectedRoute'
+import PostInterview from './components/postInterview'
 function App() {
 
   return (
@@ -25,6 +26,8 @@ function App() {
               }
             />
           <Route path="/ai-interview" element={<AiInterview />} />
+          <Route path="/postinterview" element={<PostInterview />} />
+
         </Routes>
       </BrowserRouter>
     </>

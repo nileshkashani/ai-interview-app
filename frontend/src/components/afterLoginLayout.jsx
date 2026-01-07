@@ -25,6 +25,7 @@ const navItems = [
 const AfterLoginLayout = () => {
   const [activeTab, setActiveTab] = useState("Mock Interview");
 
+  
   const handleLogout = async () => {
     await logoutUser();
   }
@@ -71,11 +72,11 @@ const AfterLoginLayout = () => {
         {activeTab === "Mock Interview" && (
           <div className="flex flex-col lg:flex-row w-full h-full">
 
-            <div className="flex-1">
+            <div className="flex-1 p-2">
               <AiInterviewForm />
             </div>
 
-            <div className=" lg:w-[420px]">
+            <div className=" lg:w-[420px] p-2">
               <InterviewCards />
             </div>
 

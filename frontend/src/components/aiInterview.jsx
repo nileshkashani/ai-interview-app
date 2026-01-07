@@ -2,58 +2,147 @@ import { useEffect, useRef, useState } from "react"
 import Vapi from "@vapi-ai/web"
 import { Button } from "./ui/button"
 import axios from "axios"
+import { useLocation, useNavigate } from 'react-router-dom'
+import { PhoneOff, Mic } from "lucide-react"
+
+
+
 const vapi = new Vapi(import.meta.env.VITE_VAPI_PUBLIC_KEY)
 
 export default function AiInterview() {
+    const [isCompleted, setIsCompleted] = useState(false);
     const [questions, setQuestions] = useState([])
-    const [current, setCurrent] = useState(0)
     const [answers, setAnswers] = useState([])
+    const [isActive, setIsActive] = useState(false)
+    const { state } = useLocation()
+    const [currentAnswer, setCurrentAnswer] = useState("")
+    const [interview, setInterview] = useState({});
+    const [aiSpeaking, setAiSpeaking] = useState(false)
+    const [userSpeaking, setUserSpeaking] = useState(false)
 
+
+    const navigate = useNavigate()
+
+    const interviewId = state?.interviewId
 
     useEffect(() => {
+        console.log(answers)
+    }, [answers])
+
+    const hangUpInterview = async () => {
+        try {
+            if (currentAnswer.trim()) {
+                setAnswers(prev => [...prev, currentAnswer.trim()])
+                setCurrentAnswer("")
+            }
+            await vapi.stop()
+            navigate('/postinterview', { state: { interviewId: interviewId } })
+            setIsActive(false)
+            const updateResp = await axios.put(`http://localhost:3000/interview/update/${interviewId}`)
+            console.log("update: ", updateResp);
+            const answerResp = await axios.post("http://localhost:3000/answers/add", { interviewId: interviewId, answers: answers });
+            console.log(answerResp);
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+
+    useEffect(() => {
+
         const handler = (msg) => {
+            if (msg.type === "speech.start" && msg.role === "assistant") {
+                setAiSpeaking(true)
+            }
+
+            if (msg.type === "speech.end" && msg.role === "assistant") {
+                setAiSpeaking(false)
+            }
+
+            if (msg.type === "speech.start" && msg.role === "user") {
+                setUserSpeaking(true)
+            }
+
+            if (msg.type === "speech.end" && msg.role === "user") {
+                setUserSpeaking(false)
+            }
+
+
             if (
                 msg.type === "transcript" &&
                 msg.transcriptType === "final" &&
                 msg.role === "user"
             ) {
-                const answer = msg.transcript
-                setAnswers(prev => [...prev, answer])
+                setCurrentAnswer(prev => prev + " " + msg.transcript)
+            }
+
+            if (
+                msg.type === "transcript" &&
+                msg.transcriptType === "final" &&
+                msg.role === "assistant"
+            ) {
+                const text = msg.transcript?.trim() || ""
+
+                const looksLikeQuestion =
+                    text.endsWith("?") ||
+                    text.toLowerCase().startsWith("describe") ||
+                    text.toLowerCase().startsWith("explain") ||
+                    text.toLowerCase().startsWith("how") ||
+                    text.toLowerCase().startsWith("what") ||
+                    text.toLowerCase().startsWith("when") ||
+                    text.toLowerCase().startsWith("why")
+
+                if (looksLikeQuestion && currentAnswer.trim()) {
+                    setAnswers(prev => [...prev, currentAnswer.trim()])
+                    setCurrentAnswer("")
+                }
             }
         }
-
         vapi.on("message", handler)
         return () => vapi.off("message", handler)
-    }, [])
 
-
-    let parsedQuestions;
-
-    const parsedQuestionsRef = useRef([])
-    // useEffect(() => {
-    //     if (questions.length) {
-    //         parsedQuestionsRef.current = questions.map(q => (q.text))
-    //     }
-    //     if (parsedQuestionsRef.current.length) {
-    //         parsedQuestions = parsedQuestionsRef.current;
-    //         startInterview()
-    //     }
-    // }, [questions])  //uncomment to start interview
+    }, [currentAnswer])
 
     useEffect(() => {
         const func = async () => {
-            await axios.get("http://localhost:3000/questions/1").then(res => {
+            const resp = await axios.get(`/http://localhost:3000/interview/update/${interviewId}`);
+            console.log("resp: ", resp);
+        }
+    }, [])
+
+
+
+
+    const parsedQuestionsRef = useRef([])
+
+    useEffect(() => {
+        if (questions.length) {
+            parsedQuestionsRef.current = questions.map(q => (q.text))
+        }
+    }, [questions])  //uncomment to start interview
+
+    useEffect(() => {
+        const func = async () => {
+            await axios.get(`http://localhost:3000/questions/${interviewId}`).then(res => {
                 setQuestions(res.data.data)
-            })
+                console.log(res);
+            }).catch(e => console.error(e));
         }
         func();
     }, [])
 
+    useEffect(() => {
+        async function func() {
+            const resp = await axios.get(`http://localhost:3000/interview/getById/${interviewId}`);
+            setInterview(resp.data.data)
+        }
+        func();
+    })
 
     const startInterview = async () => {
         const assistantOptions = {
             name: "AI Recruiter",
-            firstMessage: "Hi John doe, how are you? Ready for your interview on SDE?",
+            firstMessage: `Hi ${localStorage.getItem("user") || 'John Doe'}, how are you? Ready for your interview on ${interview.topic || 'for your selected topic'}?`,
 
             transcriber: {
                 provider: "deepgram",
@@ -77,10 +166,10 @@ You are an AI voice assistant conducting interviews.
 Your job is to ask candidates provided interview questions, assess their responses.
 
 Begin the conversation with a friendly introduction, setting a relaxed yet professional tone. Example:
-"Hey there! Welcome to your ${"SDE"} interview. Let's get started with a few questions!"
+"Hey there! Welcome to your ${interview.topic} interview. Let's get started with a few questions!"
 
 Ask one question at a time and wait for the candidate's response before proceeding. Keep the questions clear and concise. Below are the questions which you need to ask one by one to the candidate:
-Questions: ${parsedQuestions} 
+Questions: ${parsedQuestionsRef.current}  
 
 If the candidate struggles, offer hints or rephrase the question without giving away the answer. Example:
 "Need a hint? Think about how React tracks component updates!"
@@ -102,7 +191,7 @@ Key Guidelines:
 • Keep responses short and natural, like a real conversation
 • Adapt based on the candidate’s confidence level
 • Take questions from interview from provided questions only
-• Dont invent your own questions (most imp guideline) again, never ever invent your own questions just choose random question from list of questions provided. location for questions is "Questions: ${parsedQuestions}" this.
+• Dont invent your own questions (most imp guideline) again, never ever invent your own questions just choose random question from list of questions provided. location for questions is "Questions: ${parsedQuestionsRef.current}" this.
 
 `,
                     },
@@ -110,19 +199,68 @@ Key Guidelines:
             },
         }
         try {
-            vapi.start(assistantOptions)
-        }
-        catch (e) {
-            console.error(e);
+            await vapi.start(assistantOptions)
+            setIsActive(true)
+        } catch (e) {
+            console.error(e)
         }
     }
 
+    if (!isActive) {
+        return (
+            <div className="flex h-screen items-center justify-center bg-zinc-100">
+                <Button className="bg-red-500 hover:bg-red-600 text-white px-8 py-6 text-lg" onClick={startInterview}>
+                    Start Interview
+                </Button>
+            </div>
+        )
+    }
+
     return (
-        <div className="flex h-screen items-center justify-center">
-            <Button onClick={startInterview}>Start Interview</Button>
-            <pre className="absolute bottom-4 left-4 bg-black text-green-400 p-3 rounded max-w-md">
-                {JSON.stringify(answers, null, 2)}
-            </pre>
+        <div className="h-screen w-screen bg-zinc-100 flex flex-col">
+
+            <div className="h-screen bg-zinc-100 flex flex-col">
+                <div className="flex justify-between items-center px-6 py-4 bg-white border-b">
+                    <div className="font-semibold text-zinc-800">AI Interview Session</div>
+                </div>
+
+                <div className="flex-1 grid grid-cols-2 gap-6 p-6">
+                    <div className="bg-white rounded-xl shadow-sm flex flex-col items-center justify-center gap-4">
+                        <div className={`w-20 h-20 rounded-full flex items-center justify-center text-xl font-semibold
+  ${aiSpeaking ? "bg-red-500 text-white animate-pulse ring-4 ring-red-300" : "bg-zinc-200 text-zinc-700"}
+`}>
+
+                            AI
+                        </div>
+                        <div className="text-zinc-700 font-medium">AI Recruiter</div>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-sm flex flex-col items-center justify-center gap-4">
+                        <div className={`w-20 h-20 rounded-full flex items-center justify-center text-xl font-semibold
+  ${userSpeaking ? "bg-blue-500 text-white animate-pulse ring-4 ring-blue-300" : "bg-blue-500 text-white"}
+`}>
+
+                            {localStorage.getItem("name").charAt(0).toUpperCase()}
+                        </div>
+                        <div className="text-zinc-700 font-medium">{localStorage.getItem("name")}</div>
+                    </div>
+                </div>
+
+                <div className="pb-10 flex flex-col items-center gap-3">
+                    <div className="flex gap-6">
+
+                        <button
+                            onClick={hangUpInterview}
+                            className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition"
+                        >
+                            <PhoneOff />
+                        </button>
+                    </div>
+
+                    <div className="text-zinc-500 text-sm">Interview in Progress...</div>
+                </div>
+            </div>
+            )
         </div>
     )
 }

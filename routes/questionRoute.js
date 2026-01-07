@@ -7,29 +7,39 @@ dotenv.config()
 const router = e.Router()
 
 
-const getPrompt = (post, experience, skills) => `
+const getPrompt = (post, experience, skills) => 
+`
 You are an AI interview engine.
 
-Your task is to generate exactly 9 high-quality technical interview questions for the role of ${post}, having ${experience}, and having ${skills}
-You MUST follow these rules strictly:
+Generate exactly 9 high-quality technical interview questions for the role of ${post}, for a candidate with ${experience} years of experience and skills in ${skills}.
 
-1. The output MUST be a valid JSON array of 9 objects.
-2. Each object MUST have the following exact fields:
-   - "qNo": a number from 1 to 9
+STRICT OUTPUT RULES — THESE MUST BE FOLLOWED EXACTLY:
+
+1. Output MUST be a valid JSON array.
+2. The array MUST contain exactly 9 objects.
+3. Each object MUST have ONLY these fields:
+   - "qNo": number from 1 to 9
    - "text": a single interview question as a string
-3. The output MUST contain only JSON. No explanations, no comments, no markdown, no extra text.
-4. Do NOT wrap the output in code blocks.
-5. The array MUST contain exactly 9 elements.
+4. DO NOT include any explanations, comments, markdown, backticks, or additional text.
+5. DO NOT wrap the output in code blocks.
+6. The response MUST contain JSON ONLY — no other characters before or after.
+7. Question should always end with a question mark ignoring grammer.
 
-Required JSON format:
+The JSON must follow this exact format:
 
 [
-  { "qNo": 1, "text": "question here" },
-  { "qNo": 2, "text": "question here" },
-  ...
-  { "qNo": 9, "text": "question here" }
+  { "qNo": 1, "text": "question here?" },
+  { "qNo": 2, "text": "question here?" },
+  { "qNo": 3, "text": "question here?" },
+  { "qNo": 4, "text": "question here?" },
+  { "qNo": 5, "text": "question here?" },
+  { "qNo": 6, "text": "question here?" },
+  { "qNo": 7, "text": "question here?" },
+  { "qNo": 8, "text": "question here?" },
+  { "qNo": 9, "text": "question here?" }
 ]
-`
+`;
+
 
 export const generateQuestions = async (topic, experience, skills, interviewId) => {
     try {
@@ -38,11 +48,11 @@ export const generateQuestions = async (topic, experience, skills, interviewId) 
         })
         const prompt = getPrompt(topic, experience, skills);
         const geminiResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
+            model: "gemini-2.5-flash-lite",
             contents: prompt,
         });
-        
-        const parsedResponse = JSON.parse(geminiResponse.candidates[0].content.parts[0].text);
+        const modifiedResp = geminiResponse.candidates[0].content.parts[0].text;
+        const parsedResponse = JSON.parse(modifiedResp);
 
         for (const r of parsedResponse) {
             questionModel.create({
@@ -74,11 +84,13 @@ router.get('/:interviewId/:qNo', async (req, resp) => {
         resp.json({success: false, message: e})
     }
 })
+
+
 router.get('/:interviewId', async (req, resp) => {
     try {
         const response = await questionModel.find({interviewId: req.params.interviewId})
-        // console.log(resp);
-        resp.json({success: true, data: response})
+        console.log(response);
+        resp.json({success: true, data: response}) 
     } catch (e) {
         console.log(e);
         resp.json({success: false, message: e})
