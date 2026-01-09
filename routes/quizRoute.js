@@ -114,7 +114,7 @@ router.post('/answers/add', async (req, resp) => {
             });
         }
         await quizAnswerModel.insertMany(answerDocs);
-        await quizResultModel.insertOne({quizId: questions[0].quizId.toString(), score: score});
+        await quizResultModel.insertOne({ quizId: questions[0].quizId.toString(), score: score });
         resp.json({ success: true, score: score });
     } catch (e) {
         resp.json({ success: false, message: e.message });
@@ -123,9 +123,32 @@ router.post('/answers/add', async (req, resp) => {
 
 router.get('/results/:quizId', async (req, resp) => {
     try {
-        resp.json(resultModel.findOne({quizId: req.params.quizId}))
+        resp.json(await resultModel.findOne({ quizId: req.params.quizId }))
     } catch (e) {
-        resp.json({success: false, message: e.message});
+        resp.json({ success: false, message: e.message });
     }
 })
+
+router.get('/findByIsCompleted', async (req, resp) => {
+    try {
+        resp.json(await quizModel.find({ isCompleted: false }));
+    } catch (e) {
+        resp.json({ success: false, message: e.message });
+    }
+})
+
+router.put('/update/:quizId', async (req, res) => {
+    try {
+        const updated = await quizModel.updateOne(
+            { _id: req.params.quizId },
+            { $set: { isCompleted: true } }
+        )
+
+        res.json({ success: true, result: updated })
+    } catch (e) {
+        res.status(500).json({ success: false, message: e.message })
+    }
+})
+
+
 export default router;

@@ -13,24 +13,24 @@ import { AiOutlineRobot } from "react-icons/ai"
 import AiInterviewForm from "./aiInterviewForm"
 import { logoutUser } from "@/services/authService"
 import InterviewCards from "./interviewCards"
+import InterviewQuizForm from "./interviewQuizForm"
+import QuizCards from "./quizCards"
 
 const navItems = [
   { label: "Overview", icon: LayoutGrid },
   { label: "Mock Interview", icon: AiOutlineRobot },
-  { label: "Interview Quiz", icon: HelpCircle },
-  { label: "Create Room", icon: Video },
-  { label: "Profile", icon: User }
+  { label: "Ai Generated Quiz", icon: HelpCircle },
 ]
 
 const AfterLoginLayout = () => {
   const [activeTab, setActiveTab] = useState("Mock Interview");
 
-  
+
   const handleLogout = async () => {
     await logoutUser();
   }
   return (
-      <div className="flex min-h-screen w-screen overflow-hidden">
+    <div className="flex max-h-screen max-w-screen overflow-hidden">
       <aside className="h-screen w-64 bg-zinc-900 text-zinc-100 flex flex-col">
         <div className="flex items-center gap-2 px-6 py-5 text-lg font-semibold">
           <div className="h-8 w-8 rounded-lg bg-red-500 flex items-center justify-center">
@@ -80,6 +80,16 @@ const AfterLoginLayout = () => {
               <InterviewCards />
             </div>
 
+          </div>
+        )}
+        {activeTab === "Ai Generated Quiz" && (
+          <div className="flex flex-col lg:flex-row w-full h-full">
+            <div className="flex-1 p-2">
+              <InterviewQuizForm />
+            </div>
+            <div className=" lg:w-[420px] p-2">
+              <QuizCards />
+            </div>
           </div>
         )}
       </main>
