@@ -8,6 +8,7 @@ import { Zap, Mail, Lock, User, ArrowRight, Users, Briefcase } from "lucide-reac
 import { cn } from "@/lib/utils"
 import { FcGoogle } from "react-icons/fc"
 import { loginWithGoogle } from "@/services/authService"
+import axios from "axios"
 
 export default function Signup() {
   const [name, setName] = useState("")
@@ -27,7 +28,12 @@ export default function Signup() {
       const resp = await signup(name, email, password, role)
       localStorage.setItem("userUid", resp.uid)
       localStorage.setItem("name", resp.displayName)
-      navigate("/dashboard")
+      const dbResp = await axios.post('http://localhost:3000/user/add', { name: name, email: email, firebaseId: resp.uid });
+      console.log(dbResp)
+
+      if (dbResp.data.success) {
+        navigate("/dashboard")
+      }
     } catch (error) {
       console.error("Signup failed:", error)
     } finally {
@@ -38,9 +44,14 @@ export default function Signup() {
   const handleSignupWithGoogle = async () => {
     try {
       const resp = await loginWithGoogle();
+      console.log(resp);
       localStorage.setItem("userUid", resp.uid)
       localStorage.setItem("name", resp.displayName)
-      navigate('/dashboard')
+     const dbResp = await axios.post('http://localhost:3000/user/add', { name: resp.displayName, email: resp.email, firebaseId: resp.uid });
+      console.log(dbResp)
+      if (dbResp.data.success) {
+        navigate("/dashboard")
+      }
     } catch (error) {
       console.error("Signup failed:", error)
     } finally {

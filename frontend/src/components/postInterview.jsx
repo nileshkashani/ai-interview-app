@@ -1,6 +1,7 @@
 import axios from "axios"
 import React, { useEffect, useState } from "react"
 import { useLocation } from "react-router-dom"
+import ScoreCircle from "./ui/scoreCircle"
 
 const PostInterview = () => {
     const { state } = useLocation()
@@ -35,14 +36,10 @@ const PostInterview = () => {
         <div className="min-h-screen bg-zinc-100 p-10">
             <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
 
-                <div className="flex items-center justify-between">
-                    <div className="text-2xl font-semibold text-zinc-800">
-                        Interview Evaluation
-                    </div>
-                    <div className="bg-red-500 text-white px-4 py-1 rounded-full font-medium">
-                        Score: {result.score}/100
-                    </div>
+                <div className="flex justify-center mb-6">
+                    <ScoreCircle score={result.score} size={160} />
                 </div>
+
 
                 <div className="flex flex-col gap-8">
 

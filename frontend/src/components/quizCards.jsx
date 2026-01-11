@@ -12,7 +12,7 @@ const QuizCards = () => {
   useEffect(() => {
     const func = async () => {
       try {
-        const resp = await axios.get(`http://localhost:3000/quiz/findByIsCompleted`)
+        const resp = await axios.get(`http://localhost:3000/quiz/findByIsCompleted/${localStorage.getItem("userUid")}`);
         console.log(resp)
         setQuiz(resp.data)
       }

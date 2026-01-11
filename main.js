@@ -1,6 +1,7 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
+import uploadRoute from './routes/uploadRoute.js'
 import questionRoute from './routes/questionRoute.js'
 import answerRoute from './routes/answerRoutes.js'
 import dotenv from 'dotenv'
@@ -8,6 +9,7 @@ import dotenv from 'dotenv'
 import interviewRoute from './routes/interviewRoutes.js'
 import resultRoute from './routes/resultRoutes.js'
 import quizRoute from './routes/quizRoute.js'
+import userRoute from './routes/userRoute.js'
 
 dotenv.config()
 const app = express()
@@ -20,14 +22,12 @@ app.use(cors({
   credentials: true
 }))
 
-//ai-interview
 app.use('/questions', questionRoute)
 app.use('/interview', interviewRoute);
 app.use('/answers', answerRoute);
 app.use('/results', resultRoute);
-
-//ai-quiz
-
+app.use('/user', userRoute);
+app.use('/resume', uploadRoute)
 app.use('/quiz', quizRoute)
 app.get('/', (req, resp) => {
     resp.json("hello world");

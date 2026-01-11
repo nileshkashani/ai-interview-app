@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "./ui/button"
 import { Zap, ArrowRight, CheckCircle, MessageSquareText, HelpCircle, Video } from "lucide-react"
 import { FaRobot } from "react-icons/fa6"
@@ -12,16 +12,17 @@ const features = [
 ]
 
 export default function Starter() {
+  const navigate = useNavigate()
   return (
     <div className="min-h-screen bg-background text-foreground">
 
       <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" onClick={() => navigate('/')}>
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-              <Zap className="h-5 w-5 text-primary-foreground" />
+              <Zap className="h-5 w-5 text-primary-foreground bg-red-500" />
             </div>
-            <span className="text-lg font-bold">Interview.io</span>
+            <span className="text-lg font-bold cursor-pointer">Interview.io</span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -29,7 +30,7 @@ export default function Starter() {
               <Button variant="ghost">Sign in</Button>
             </Link>
             <Link to="/signup">
-              <Button>Get Started</Button>
+              <Button className={'cursor-pointer'}>Get Started</Button>
             </Link>
           </div>
         </div>
@@ -43,7 +44,7 @@ export default function Starter() {
           </div>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Ace Your Next
+            <span className="text-red-500">Ace</span> Your Next
             <span className="text-primary block">Technical Interview</span>
           </h1>
 
@@ -53,14 +54,14 @@ export default function Starter() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link to="/signup">
-              <Button size="lg" className="px-8">
+              <Button size="lg" className="px-8 bg-red-500 hover:bg-red-700 cursor-pointer">
                 Start Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
 
             <Link to="/login">
-              <Button size="lg" variant="outline" className="px-8">
+              <Button size="lg" variant="outline" className="px-8 cursor-pointer">
                 I have an account
               </Button>
             </Link>

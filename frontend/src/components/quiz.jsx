@@ -1,10 +1,12 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import ScoreCircle from './ui/scoreCircle'
 
 const Quiz = () => {
     const { state } = useLocation()
     const quizId = state?.quizId
+    const navigate = useNavigate()
 
     const [questions, setQuestions] = useState([])
     const [answers, setAnswers] = useState({})
@@ -42,16 +44,10 @@ const Quiz = () => {
 
         const resp = await axios.put(`http://localhost:3000/quiz/update/${quizId}`)
         console.log(resp)
+
+        navigate('/quizResult', {state: {score: res.data.score, noOfQuestions: questions.length}})
     }
 
-    if (isSubmitted) {
-        return (
-            <div className="max-w-xl mx-auto p-6 text-center space-y-4">
-                <h2 className="text-xl font-bold">Quiz Completed</h2>
-                <p>Your Score: <span className="font-semibold">{score}/{questions.length}</span></p>
-            </div>
-        )
-    }
 
     return (
         <div className="flex flex-col lg:flex-row w-full h-full bg-zinc-50 p-6 gap-6">
@@ -62,7 +58,7 @@ const Quiz = () => {
                 {questions.map((q, qIndex) => (
                     <div key={q._id} className="border rounded-xl p-5 space-y-4">
                         <p className="font-medium text-zinc-800">
-                            {qIndex + 1}. {q.text.replace("```c", "").replace("```", "")} 
+                            {qIndex + 1}. {q.text.replace("```c", "").replace("```", "")}
                         </p>
 
                         <div className="space-y-2">

@@ -2,28 +2,45 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import {
   LayoutGrid,
-  HelpCircle,
-  Video,
-  User,
   LogOut,
-  Zap
+  Zap,
 } from "lucide-react"
-import { useState } from "react"
-import { AiOutlineRobot } from "react-icons/ai"
+import { useEffect, useState } from "react"
+import { RiRobot3Line } from "react-icons/ri";
 import AiInterviewForm from "./aiInterviewForm"
 import { logoutUser } from "@/services/authService"
 import InterviewCards from "./interviewCards"
 import InterviewQuizForm from "./interviewQuizForm"
 import QuizCards from "./quizCards"
+import OverviewDashboard from "./overviewDashboard"
+import { MdOutlineFindInPage, MdOutlineQuiz } from "react-icons/md";
+import AnalyseResume from "./analyseResume";
+import { FaRegUser } from "react-icons/fa6";
+import { useLocation } from 'react-router-dom'
 
 const navItems = [
   { label: "Overview", icon: LayoutGrid },
-  { label: "Mock Interview", icon: AiOutlineRobot },
-  { label: "Ai Generated Quiz", icon: HelpCircle },
+  { label: "Mock Interview", icon: RiRobot3Line },
+  { label: "Ai Generated Quiz", icon: MdOutlineQuiz },
+  { label: "Analyse Resume", icon: MdOutlineFindInPage },
+  { label: "Profile", icon: FaRegUser },
+
 ]
 
 const AfterLoginLayout = () => {
-  const [activeTab, setActiveTab] = useState("Mock Interview");
+
+  const [activeTab, setActiveTab] = useState("Overview");
+  const location = useLocation()
+  const tab = location.state?.tab
+
+  useEffect(() => {
+    if (tab) {
+      setActiveTab(tab)
+      window.history.replaceState({}, document.title)
+    } else {
+      setActiveTab("Overview")
+    }
+  }, [tab])
 
 
   const handleLogout = async () => {
@@ -90,6 +107,20 @@ const AfterLoginLayout = () => {
             <div className=" lg:w-[420px] p-2">
               <QuizCards />
             </div>
+          </div>
+        )}
+        {activeTab === "Overview" && (
+          <div className="h-full overflow-hidden">
+            <div className="p-2 h-full">
+              <OverviewDashboard />
+            </div>
+          </div>
+
+        )}
+
+        {activeTab === "Analyse Resume" && (
+          <div>
+            <AnalyseResume />
           </div>
         )}
       </main>

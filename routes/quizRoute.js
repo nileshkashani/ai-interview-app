@@ -13,9 +13,7 @@ dotenv.config()
 const getPrompt = (topic, noOfQuestions) => {
     return `You are a quiz generator, your task is to generate questions for quiz which includes topic and noOfQuestions to generate.
     Rules: 
-    1.Each question should be MCQ having 4 options out of which one should be correct
-    2.Difficulty level of questions should be intermediate
-    3.Output should be json object containing exact format{
+    1.Each question should be MCQ having 4 options out of which one should be correct, 2.Difficulty level of questions should be intermediate, 3.Output should be json object containing exact format{
   "questions": [
     {
       "question": "string",
@@ -24,13 +22,8 @@ const getPrompt = (topic, noOfQuestions) => {
     }
   ]
 }
-    5.Important! output must be a valid json and muset be able parse using JSON.parse() 
-    6.DO NOT include any explanations, comments, markdown, backticks, or additional text.
-    7.DO NOT wrap the output in code blocks.
-    8.The response MUST contain JSON ONLY — no other characters before or after
-    contents: 
-    topic: ${topic},
-    numberOfQuestions: ${noOfQuestions}`
+    5.Important! output must be a valid json and muset be able parse using JSON.parse() , 6.DO NOT include any explanations, comments, markdown, backticks, or additional text, 7.DO NOT wrap the output in code blocks, 8.The response MUST contain JSON ONLY — no other characters before or after
+    contents: topic: ${topic}, numberOfQuestions: ${noOfQuestions}`
 }
 
 export const generateQuestions = async (topic, noOfQuestions) => {
@@ -123,15 +116,15 @@ router.post('/answers/add', async (req, resp) => {
 
 router.get('/results/:quizId', async (req, resp) => {
     try {
-        resp.json(await resultModel.findOne({ quizId: req.params.quizId }))
+        resp.json(await quizResultModel.findOne({ quizId: req.params.quizId }))
     } catch (e) {
         resp.json({ success: false, message: e.message });
     }
 })
 
-router.get('/findByIsCompleted', async (req, resp) => {
+router.get('/findByIsCompleted/:userId', async (req, resp) => {
     try {
-        resp.json(await quizModel.find({ isCompleted: false }));
+        resp.json(await quizModel.find({ userId: req.params.userId, isCompleted: false }));
     } catch (e) {
         resp.json({ success: false, message: e.message });
     }
