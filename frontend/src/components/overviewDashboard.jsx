@@ -13,6 +13,7 @@ const OverviewDashboard = () => {
         const func = async () => {
             const resp = await axios.get(`http://localhost:3000/interview/getInterviewsForDashboard/${localStorage.getItem("userUid")}`)
                 .then(res => {
+                    console.log(res)
                     const result = Array.isArray(res.data.data) ? res.data.data : Object.values(res.data.data)
                     setData(result)
                     setScore(res.data.avgScore)

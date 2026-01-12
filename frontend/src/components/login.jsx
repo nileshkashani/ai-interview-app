@@ -38,11 +38,7 @@ export default function Login() {
       console.log(resp)
       localStorage.setItem("userUid", resp.uid)
       localStorage.setItem("name", resp.displayName)
-      const dbResp = await axios.post('http://localhost:3000/user/add', { name: resp.displayName, email: resp.email, firebaseId: resp.uid });
-      console.log(dbResp)
-      if (dbResp.data.success) {
-        navigate("/dashboard")
-      }
+      navigate("/dashboard")
     } catch (error) {
       console.error("Login failed:", error)
     } finally {

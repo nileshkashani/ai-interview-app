@@ -87,7 +87,7 @@ const AfterLoginLayout = () => {
       </aside>
       <main className="flex-1 overflow-y-auto">
         {activeTab === "Mock Interview" && (
-          <div className="flex flex-col lg:flex-row w-full h-full">
+          <div className="flex flex-col lg:flex-row w-full h-full overflow-hidden">
 
             <div className="flex-1 p-2">
               <AiInterviewForm />
@@ -115,7 +115,6 @@ const AfterLoginLayout = () => {
               <OverviewDashboard />
             </div>
           </div>
-
         )}
 
         {activeTab === "Analyse Resume" && (
