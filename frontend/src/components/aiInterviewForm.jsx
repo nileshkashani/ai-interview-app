@@ -6,14 +6,22 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { TabStore } from "@/store/tabStore"
 import { useNavigate } from "react-router-dom"
+import { Spinner } from "./ui/spinner"
 
+
+const messages = [
+    "Generating interview questions...",
+    "Getting interview ready..."
+]
 const AiInterviewForm = () => {
     const [interviewTopic, setInterviewTopic] = useState("")
     const [experience, setExperience] = useState("")
     const [skills, setSkills] = useState("")
+    const [loading, setLoading] = useState(false);
     const setTrigger = TabStore(state => state.setTrigger)
 
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [msgIndex, setMsgIndex] = useState(0)
 
     const handleClick = async () => {
         if (isSubmitting) return
@@ -21,13 +29,36 @@ const AiInterviewForm = () => {
         await handleSubmit()
     }
 
+    useEffect(() => {
+        if (!loading) return
+        if (msgIndex >= messages.length - 1) return
+
+        const timer = setTimeout(() => {
+            setMsgIndex(i => i + 1)
+        }, 3000)
+
+        return () => clearTimeout(timer)
+    }, [loading, msgIndex])
+
     const navigate = useNavigate()
 
     const handleSubmit = async () => {
+        setLoading(true)
         const resp = await axios.post('http://localhost:3000/interview/add', { userId: localStorage.getItem("userUid"), topic: interviewTopic, experience: experience, skills: skills });
         setTrigger();
         console.log(resp);
         navigate('/ai-interview', { state: { interviewId: resp.data.data._id } })
+    }
+
+    if (loading) {
+        return (
+            <div className="flex flex-col justify-center items-center text-red-500 h-screen gap-4">
+                <Spinner className="h-10 w-10" />
+                <p className="text-lg font-medium animate-pulse">
+                    {messages[msgIndex]}
+                </p>
+            </div>
+        )
     }
     return (
         <div className="bg-white  h-full px-6 py-10 pt-2 overflow-hidden">

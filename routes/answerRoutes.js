@@ -6,7 +6,7 @@ import resultModel from "../models/resultModel.js";
 
 const router = e.Router()
 
-const getPrompt = (QUESTIONS, ANSWERS) =>
+export const getPrompt = (QUESTIONS, ANSWERS) =>
     `You are an expert technical interviewer and evaluator.
 You will be given:
 1) A list of interview questions, 2) A list of the candidate’s spoken answers (unstructured, conversational, may include filler words, partial explanations, or incomplete sentences)
@@ -14,13 +14,13 @@ Your task is to carefully match each answer to the corresponding question, inter
 
 STRICT EVALUATION REQUIREMENTS:
 1. Score the candidate out of 100 based on:
-   • technical correctness, depth of understanding, clarity of explanation, problem-solving ability, relevance of answers to the questions
+   • technical correctness, depth of understanding, clarity of explanation, problem-solving ability, relevance of answers to the questions, communication skills and completeness of answers.
 2. Provide clear written feedback covering:
    • overall technical impression
 3. Provide a concrete improvement plan:
-   • what topics to revise, what concepts are missing, how the candidate can improve interview performance
+   • what topics to revise, what concepts are missing, how the candidate can improve interview performance, weather to improve communication skills or not based on words like 'um' 'ah', etc.
 5. Be fair but strict. Do not inflate the score.
-6. Output the evaluation in the following JSON format ONLY also, remove any characters eg '''json to avoid json.PARSE() errors: 
+6. Output the evaluation in the following JSON format ONLY also, remove any characters eg '''json to avoid json.PARSE() errors again it should be a valid json as it can create conflict in server while parsing. :
 7. Dont bold any text of output
 {
   "score": number,
@@ -75,7 +75,7 @@ router.post('/add', async (req, resp) => {
         const response = await answerModel.create({ interviewId: req.body.interviewId, answers: req.body.answers});
         const geminiResp = await getEvaluation(req.body.interviewId);
         if(!geminiResp.candidates){
-            resp.json({success: false, message: "something went wrong from external api"});
+            resp.status(500).json({success: false, message: "something went wrong from external api"});
         }
         const modifiedResponse = JSON.parse(geminiResp.candidates[0].content.parts[0].text);
         // console.log(modifiedResponse, modifiedResponse.score);

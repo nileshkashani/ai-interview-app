@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { useNavigate } from 'react-router-dom';
+import { Spinner } from './ui/spinner';
 
 
 
@@ -9,12 +10,17 @@ const QuizCards = () => {
   const navigate = useNavigate()
   const [quiz, setQuiz] = useState([])
 
+  const [loading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const func = async () => {
       try {
-        const resp = await axios.get(`http://localhost:3000/quiz/findByIsCompleted/${localStorage.getItem("userUid")}`);
-        console.log(resp)
-        setQuiz(resp.data)
+        const resp = await axios.get(`http://localhost:3000/quiz/findByIsCompleted/${localStorage.getItem("userUid")}`)
+        .then((res) => {
+        console.log(res)
+        setQuiz(res.data)
+        setIsLoading(false);
+        })
       }
       catch (e) {
         console.error(e);
@@ -22,6 +28,13 @@ const QuizCards = () => {
     }
     func();
   }, [])
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center text-red-500 h-screen'>
+        <Spinner className={'h-10 w-10'} />
+      </div>
+    )
+  }
   return (
     <div className="bg-white max-h-screen px-6 py-10 pt-2 overflow-auto">
 

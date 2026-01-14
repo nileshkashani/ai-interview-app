@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ScoreCircle = ({ score, size = 140, stroke = 10 }) => {
+const ScoreCircle = ({ score, total, size = 140, stroke = 10 }) => {
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
 
@@ -26,7 +26,7 @@ const ScoreCircle = ({ score, size = 140, stroke = 10 }) => {
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center text-2xl font-semibold">
-        {score}%
+        {total !== undefined? `${score} / ${total}`: `${score}%`}
       </div>
     </div>
   )

@@ -1,21 +1,36 @@
 import axios from "axios"
 import React, { useEffect, useState } from "react"
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import ScoreCircle from "./ui/scoreCircle"
+import { Button } from "./ui/button"
+import { Spinner } from "./ui/spinner"
 
 const PostInterview = () => {
     const { state } = useLocation()
     const interviewId = state?.interviewId
 
+    const [error, setError] = useState(null)
     const [result, setResult] = useState(null)
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchResult = async () => {
             try {
                 const resp = await axios.get(
                     `http://localhost:3000/results/getByInterviewId/${interviewId}`
-                )
-                setResult(resp.data.data)
+                ).then(res => setResult(res.data.data))
+                    .catch(async (e) => {
+                        console.log(e);
+                        //call generate result
+                        const again = await axios.get(`http://localhost:3000/results/generateAfterFailure/${interviewId}`)
+                            .then(res => {
+                                console.log(res.data);
+                                setResult(res.data.data)
+                            })
+                            .catch(e => setError(e.data.message))
+                        //set messages like" results not found" generating again...
+
+                    })
             } catch (e) {
                 console.error(e)
             }
@@ -26,12 +41,18 @@ const PostInterview = () => {
 
     if (!result) {
         return (
-            <div className="h-screen flex items-center justify-center bg-zinc-100 text-zinc-500">
-                Loading results...
+            <div className="h-screen flex items-center justify-center text-red-500">
+                <Spinner className={'size-12'}/>
             </div>
         )
     }
-
+    if(error != null){
+        return (
+            <div className="h-screen flex items-center justify-center">
+                {error}
+            </div>
+        )
+    }
     return (
         <div className="min-h-screen bg-zinc-100 p-10">
             <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm p-8 space-y-6">
@@ -61,7 +82,9 @@ const PostInterview = () => {
 
                 </div>
 
-
+                <div>
+                    <Button onClick={() => navigate('/dashboard')}>Dashboard</Button>
+                </div>
             </div>
         </div>
     )

@@ -1,25 +1,56 @@
 import axios from 'axios'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from 'react-router-dom'
+import { Spinner } from './ui/spinner'
 
-
+const messages = [
+    "Generating quiz questions...",
+    "Getting quiz ready...",
+    "Almost Done"
+]
 
 const InterviewQuizForm = () => {
     const [topic, setTopic] = useState("")
     const [noOfQuestions, setNoOfQuestions] = useState(10)
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [msgIndex, setMsgIndex] = useState(0)
+
     const navigate = useNavigate()
     const handleClick = async () => {
         setIsSubmitting(true)
-        const resp = await axios.post("http://localhost:3000/quiz/add", {topic: topic, noOfQuestions: noOfQuestions, userId: localStorage.getItem("userUid")});
+        const resp = await axios.post("http://localhost:3000/quiz/add", { topic: topic, noOfQuestions: noOfQuestions, userId: localStorage.getItem("userUid") });
         console.log(resp);
-        if(resp.data.success){
-            navigate('/quiz', {state: {quizId: resp.data.data._id}});
+        if (resp.data.success) {
+            navigate('/quiz', { state: { quizId: resp.data.data._id } });
         }
+        else{
+            return (<div className='flex h-screen text-center'>Something went wrong from google gemini's side</div>)
+        }
+    }
+    useEffect(() => {
+        if (!isSubmitting) return
+        if (msgIndex >= messages.length - 1) return
+
+        const timer = setTimeout(() => {
+            setMsgIndex(i => i + 1)
+        }, 3000)
+
+        return () => clearTimeout(timer)
+    }, [isSubmitting, msgIndex])
+
+    if (isSubmitting) {
+        return (
+            <div className="flex flex-col justify-center items-center text-red-500 h-screen gap-4">
+                <Spinner className="h-10 w-10" />
+                <p className="text-lg font-medium animate-pulse">
+                    {messages[msgIndex]}
+                </p>
+            </div>
+        )
     }
     return (
         <div className="bg-white  h-full px-6 py-10 pt-2 overflow-hidden">

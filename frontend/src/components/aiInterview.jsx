@@ -4,9 +4,14 @@ import { Button } from "./ui/button"
 import axios from "axios"
 import { useLocation, useNavigate } from 'react-router-dom'
 import { PhoneOff, Mic } from "lucide-react"
+import { Spinner } from "./ui/spinner"
 
 
-
+const messages = [
+    "Generating Results...",
+    "Evaluating...",
+    "Almost done..."
+]
 const vapi = new Vapi(import.meta.env.VITE_VAPI_PUBLIC_KEY)
 
 export default function AiInterview() {
@@ -19,6 +24,7 @@ export default function AiInterview() {
     const [interview, setInterview] = useState({});
     const [aiSpeaking, setAiSpeaking] = useState(false)
     const [userSpeaking, setUserSpeaking] = useState(false)
+    const [msgIndex, setMsgIndex] = useState(0)
 
 
     const navigate = useNavigate()
@@ -26,27 +32,38 @@ export default function AiInterview() {
     const interviewId = state?.interviewId
 
     useEffect(() => {
-        console.log(answers)
-    }, [answers])
+        if (!isCompleted) return
+        if (msgIndex >= messages.length - 1) return
+
+        const timer = setTimeout(() => {
+            setMsgIndex(i => i + 1)
+        }, 3000)
+
+        return () => clearTimeout(timer)
+    }, [isCompleted, msgIndex])
 
     const hangUpInterview = async () => {
         try {
+            setIsCompleted(true)
+            setIsActive(false)
             if (currentAnswer.trim()) {
                 setAnswers(prev => [...prev, currentAnswer.trim()])
                 setCurrentAnswer("")
             }
             await vapi.stop()
-            navigate('/postinterview', { state: { interviewId: interviewId } })
-            setIsActive(false)
+
             const updateResp = await axios.put(`http://localhost:3000/interview/update/${interviewId}`)
             console.log("update: ", updateResp);
-            const answerResp = await axios.post("http://localhost:3000/answers/add", { interviewId: interviewId, answers: answers });
-            console.log(answerResp);
+            const answerResp = await axios.post("http://localhost:3000/answers/add", { interviewId: interviewId, answers: answers })
+                .then(res => navigate('/postinterview', { state: { interviewId: interviewId } }))
+                .catch(r => navigate('/dashboard'));
         }
         catch (e) {
             console.error(e);
         }
     }
+
+
 
     useEffect(() => {
 
@@ -110,9 +127,6 @@ export default function AiInterview() {
         }
     }, [])
 
-
-
-
     const parsedQuestionsRef = useRef([])
 
     useEffect(() => {
@@ -165,26 +179,25 @@ export default function AiInterview() {
 You are an AI voice assistant conducting interviews.
 Your job is to ask candidates provided interview questions, assess their responses.
 
-Begin the conversation with a friendly introduction, setting a relaxed yet professional tone. Example:
-"Hey there! Welcome to your ${interview.topic} interview. Let's get started with a few questions!"
-
 Ask one question at a time and wait for the candidate's response before proceeding. Keep the questions clear and concise. Below are the questions which you need to ask one by one to the candidate:
 Questions: ${parsedQuestionsRef.current}  
 
-If the candidate struggles, offer hints or rephrase the question without giving away the answer. Example:
+If the candidate struggles, offer hints or rephrase the question without giving away the direct answer. Example:
 "Need a hint? Think about how React tracks component updates!"
 
-Provide brief, encouraging feedback after each answer. Example:
+Provide brief 1-2 lined (30-40 worded), encouraging feedback after each answer. Example:
 "Nice! That's a solid answer."
 "Hmm, not quite! Want to try again?"
 
 Keep the conversation natural and engaging — use casual phrases like "Alright, next up..." or "Let’s tackle a tricky one!"
 
-After 5–7 questions, wrap up the interview smoothly by summarizing their performance. Example:
+After 8-9 questions, wrap up the interview smoothly by summarizing their performance. Example:
 "That was great! You handled some tough questions well. Keep sharpening your skills!"
 
+After ending with questions, provide feedback based upon user's answers, communication skills, and completeness of answers also, rate user's overall performance out of 100 and let user know that.
+
 End on a positive note:
-"Thanks for chatting! Hope to see you crushing projects soon!"
+"Thankyou so much for appearing for this mock interview, hope you loved this.
 
 Key Guidelines:
 • Be friendly, engaging, and witty
@@ -204,6 +217,17 @@ Key Guidelines:
         } catch (e) {
             console.error(e)
         }
+    }
+
+    if (isCompleted) {
+        return (
+            <div className="flex flex-col justify-center items-center text-red-500 h-screen gap-4">
+                <Spinner className="h-10 w-10" />
+                <p className="text-lg font-medium animate-pulse">
+                    {messages[msgIndex]}
+                </p>
+            </div>
+        )
     }
 
     if (!isActive) {

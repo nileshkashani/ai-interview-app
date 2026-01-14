@@ -4,20 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { TabStore } from '@/store/tabStore';
 import { useNavigate } from 'react-router-dom';
 import { useLocation } from 'react-router-dom'
+import { Spinner } from './ui/spinner';
 
 
 const InterviewCards = () => {
 
   const { state } = useLocation()
   const [data, setData] = useState([]);
+  const [loading, setIsLoading] = useState(true);
+
   const navigate = useNavigate()
   const trigger = TabStore(s => s.trigger);
   useEffect(() => {
     const func = async () => {
       try {
         const resp = await axios.get(`http://localhost:3000/interview/getAll/${localStorage.getItem("userUid")}`)
-        console.log("interviews:", resp);
-        setData(resp.data.data)
+          .then((res) => {
+            // console.log("interviews:", res);
+            setData(res.data.data)
+            setIsLoading(false)
+          })
       }
       catch (e) {
         console.error(e);
@@ -25,6 +31,14 @@ const InterviewCards = () => {
     }
     func();
   }, [trigger])
+
+  if (loading) {
+    return (
+      <div className='flex justify-center items-center text-red-500 h-screen'>
+        <Spinner className={'h-10 w-10'} />
+      </div>
+    )
+  }
   return (
     <div className="bg-white max-h-screen px-6 py-10 pt-2 overflow-auto">
 

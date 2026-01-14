@@ -1,11 +1,19 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import ScoreCircle from './ui/scoreCircle'
+import { Spinner } from './ui/spinner'
+
+const messages = [
+  "Getting ATS ready...",
+  "Generating Response...",
+  "Almost done..."
+]
 
 const AnalyseResume = () => {
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [resume, setResume] = useState(null)
+  const [msgIndex, setMsgIndex] = useState(0)
 
   const handleFileChange = e => {
     const selected = e.target.files[0]
@@ -22,12 +30,34 @@ const AnalyseResume = () => {
     try {
       setLoading(true)
       const res = await axios.post('http://localhost:3000/resume/upload', formData)
-      setResume(res.data.resume)
+        .then((resp) => setResume(resp.data.resume))
+        .catch((e) => { return (<div>something went wrong please try again</div>) })
     } finally {
       setLoading(false)
     }
   }
 
+  useEffect(() => {
+    if (!loading) return
+    if (msgIndex >= messages.length - 1) return
+
+    const timer = setTimeout(() => {
+      setMsgIndex(i => i + 1)
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [loading, msgIndex])
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center text-red-500 h-screen gap-4">
+        <Spinner className="h-10 w-10" />
+        <p className="text-lg font-medium animate-pulse">
+          {messages[msgIndex]}
+        </p>
+      </div>
+    )
+  }
   return (
     <div className="h-full p-6">
       <div className="grid grid-cols-2 gap-6 h-full">

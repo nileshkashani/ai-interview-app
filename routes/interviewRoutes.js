@@ -59,7 +59,6 @@ router.get('/getInterviewsForDashboard/:userId', async (req, resp) => {
             }
             // console.log("result: ", resResp);
         }
-        console.log("score: ",score)
         resp.json({success: true, data: response, avgScore: score/count, quizResp: quizResp})
     } catch (e) {
         resp.json({success: false, message: e.message});

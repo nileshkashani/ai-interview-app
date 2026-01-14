@@ -2,41 +2,53 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ScoreCircle from './ui/scoreCircle'
+import { Spinner } from './ui/spinner'
 
 const OverviewDashboard = () => {
     const [data, setData] = useState([])
     const [quiz, setQuiz] = useState([])
     const [score, setScore] = useState(0)
+    const [loading, setIsLoading] = useState(true);
     const navigate = useNavigate()
 
     useEffect(() => {
         const func = async () => {
             const resp = await axios.get(`http://localhost:3000/interview/getInterviewsForDashboard/${localStorage.getItem("userUid")}`)
                 .then(res => {
+                    setIsLoading(false);
                     console.log(res)
                     const result = Array.isArray(res.data.data) ? res.data.data : Object.values(res.data.data)
                     setData(result)
-                    setScore(res.data.avgScore)
+                    setScore(Math.round(res.data.avgScore))
                     setQuiz(res.data.quizResp)
                 })
         }
         func()
     }, [])
 
+
     const getQuizResult = async (quizId, noOfQuestions) => {
         try {
             console.log(quizId)
             const resp = await axios.get(`http://localhost:3000/quiz/results/${quizId}`)
-            navigate('/quizResult', {state: {score: resp.data.score, noOfQuestions: noOfQuestions}})
+            navigate('/quizResult', { state: { score: resp.data.score, noOfQuestions: noOfQuestions } })
         } catch (e) {
             console.log(e.message);
         }
     }
 
+
+    if (loading) {
+        return (
+            <div className='flex justify-center items-center text-red-500 h-screen'>
+                <Spinner className={'h-10 w-10'}/>
+            </div>
+        )
+    }
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-2 h-full">
 
-           <div className="flex flex-col gap-6 h-full">
+            <div className="flex flex-col gap-6 h-full">
 
 
                 <div className="bg-white border rounded-2xl p-6 shadow-sm flex flex-col gap-2 items-center justify-between">
@@ -44,8 +56,9 @@ const OverviewDashboard = () => {
                         <h3 className="text-lg font-semibold">Interview Readiness Score</h3>
                         <p className="text-sm text-muted-foreground">Overall performance evaluation</p>
                     </div>
-
-                   <ScoreCircle score={score} />
+                    {data.length === 0 && 
+                    <div className='font-bold '>Attempt atleast one interview for this.</div>}
+                    <ScoreCircle score={score} />
 
                 </div>
 
@@ -74,7 +87,7 @@ const OverviewDashboard = () => {
                 <div className="space-y-4 overflow-y-auto flex-1 pr-1">
                     {data.filter(d => d.isCompleted).map(item => (
                         <div key={item._id} className="flex items-center gap-4 border rounded-xl p-4 hover:shadow transition cursor-pointer" onClick={() => navigate('/postInterview', { state: { interviewId: item._id } })}
->
+                        >
                             <div className="h-12 w-12 flex items-center justify-center rounded-lg bg-red-50 text-red-500 font-semibold text-lg">
                                 {item.topic?.[0]?.toUpperCase()}
                             </div>

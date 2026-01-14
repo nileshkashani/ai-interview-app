@@ -17,6 +17,8 @@ import { MdOutlineFindInPage, MdOutlineQuiz } from "react-icons/md";
 import AnalyseResume from "./analyseResume";
 import { FaRegUser } from "react-icons/fa6";
 import { useLocation } from 'react-router-dom'
+import profile from "./profile";
+import Profile from "./profile";
 
 const navItems = [
   { label: "Overview", icon: LayoutGrid },
@@ -32,6 +34,7 @@ const AfterLoginLayout = () => {
   const [activeTab, setActiveTab] = useState("Overview");
   const location = useLocation()
   const tab = location.state?.tab
+
 
   useEffect(() => {
     if (tab) {
@@ -77,7 +80,7 @@ const AfterLoginLayout = () => {
           <Separator className="mb-4 bg-zinc-800" />
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-zinc-400 hover:text-white hover:bg-zinc-800"
+            className="w-full justify-start gap-3 text-zinc-400 hover:text-white hover:bg-zinc-800 cursor-pointer"
             onClick={handleLogout}
           >
             <LogOut className="h-5 w-5" />
@@ -122,6 +125,9 @@ const AfterLoginLayout = () => {
             <AnalyseResume />
           </div>
         )}
+        {activeTab === 'Profile' &&
+          <Profile/>
+        }
       </main>
     </div>
   )
